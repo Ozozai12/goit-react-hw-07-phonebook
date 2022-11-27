@@ -7,20 +7,27 @@ import { addedContact, deletedContact } from 'redux/contactsSlice';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { filterChange } from 'redux/filterSlice';
+import { useEffect } from 'react';
+import { fetchContacts, addContact } from 'redux/operations';
 
 export function App() {
   const dispatch = useDispatch();
 
-  const contacts = useSelector(state => state.contacts);
+  const contacts = useSelector(state => state.contacts.items);
+  const isLoading = useSelector(state => state.contacts.isLoading);
+  const error = useSelector(state => state.contacts.error);
+
   const filter = useSelector(state => state.filter);
 
-  const addContact = (name, number) => {
-    const contact = {
-      id: nanoid(),
-      name,
-      number,
-    };
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
+  const handleSubmit = (name, phone) => {
+    const contact = {
+      name,
+      phone,
+    };
     if (
       contacts?.find(
         contact => contact.name.toLowerCase() === name.toLowerCase()
@@ -30,7 +37,7 @@ export function App() {
       return;
     }
 
-    dispatch(addedContact(contact));
+    dispatch(addContact(contact));
   };
 
   const deleteContact = deleteContactId => {
@@ -50,9 +57,12 @@ export function App() {
   return (
     <div className={css.section}>
       <h1>Phonebook</h1>
-      <ContactForm onSubmit={addContact} />
+      <ContactForm onSubmit={handleSubmit} />
       <h2>Contacts</h2>
-      <Filter query={filter} onChange={handleFilterChange} />
+      {contacts.length > 0 && (
+        <Filter query={filter} onChange={handleFilterChange} />
+      )}
+      {isLoading && !error && <h3>Loading contacts...</h3>}
       <ContactList
         filterContacts={filterContacts}
         onDeleteContact={deleteContact}
@@ -65,7 +75,7 @@ App.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.exact({
       name: PropTypes.string,
-      number: PropTypes.number,
+      phone: PropTypes.number,
     })
   ),
 };
