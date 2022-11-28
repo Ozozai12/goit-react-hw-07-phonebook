@@ -3,12 +3,11 @@ import { ContactForm } from 'components/ContactForm/ContactForm';
 import Filter from 'components/Filter/Filter';
 import { ContactList } from 'components/ContactList/ContactList';
 import css from 'components/App.module.css';
-import { addedContact, deletedContact } from 'redux/contactsSlice';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { filterChange } from 'redux/filterSlice';
 import { useEffect } from 'react';
-import { fetchContacts, addContact } from 'redux/operations';
+import { fetchContacts, addContact, deleteContact } from 'redux/operations';
 
 export function App() {
   const dispatch = useDispatch();
@@ -40,8 +39,8 @@ export function App() {
     dispatch(addContact(contact));
   };
 
-  const deleteContact = deleteContactId => {
-    dispatch(deletedContact(deleteContactId));
+  const handleDelete = deleteContactId => {
+    dispatch(deleteContact(deleteContactId));
   };
 
   const handleFilterChange = event => {
@@ -65,7 +64,7 @@ export function App() {
       {isLoading && !error && <h3>Loading contacts...</h3>}
       <ContactList
         filterContacts={filterContacts}
-        onDeleteContact={deleteContact}
+        onDeleteContact={handleDelete}
       />
     </div>
   );
